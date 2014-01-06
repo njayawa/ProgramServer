@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="xmlTVDBModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityContainer Name="xmlTVDBModelStoreContainer">
+          <EntitySet Name="Channel" EntityType="xmlTVDBModel.Store.Channel" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Program" EntityType="xmlTVDBModel.Store.Program" store:Type="Tables" Schema="dbo" />
+        </EntityContainer>
+        <EntityType Name="Channel">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="nchar" Nullable="false" MaxLength="30" />
+          <Property Name="displayName1" Type="text" />
+          <Property Name="displayName2" Type="text" />
+          <Property Name="displayName3" Type="text" />
+          <Property Name="displayName4" Type="text" />
+          <Property Name="displayName5" Type="text" />
+        </EntityType>
+        <EntityType Name="Program">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="StartTime" />
+            <PropertyRef Name="EndTime" />
+            <PropertyRef Name="FK_Channel" />
+          </Key>
+          <Property Name="Id" Type="nchar" Nullable="false" MaxLength="30" />
+          <Property Name="Title" Type="text" />
+          <Property Name="SubTitle" Type="text" />
+          <Property Name="Description" Type="text" />
+          <Property Name="StartTime" Type="datetime" Nullable="false" />
+          <Property Name="EndTime" Type="datetime" Nullable="false" />
+          <Property Name="Id_MS" Type="nchar" MaxLength="30" />
+          <Property Name="Id_DD" Type="nchar" MaxLength="30" />
+          <Property Name="episodeNum" Type="nchar" MaxLength="30" />
+          <Property Name="rating" Type="nchar" MaxLength="10" />
+          <Property Name="FK_Channel" Type="nchar" Nullable="false" MaxLength="30" />
+        </EntityType>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="xmlTVDBModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="xmlTVDBEntities" p1:LazyLoadingEnabled="true">
+          <EntitySet Name="Channels" EntityType="xmlTVDBModel.Channel" />
+          <EntitySet Name="Programs" EntityType="xmlTVDBModel.Program" />
+        </EntityContainer>
+        <EntityType Name="Channel">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="String" Nullable="false" MaxLength="30" Unicode="true" FixedLength="true" />
+          <Property Name="displayName1" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="displayName2" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="displayName3" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="displayName4" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="displayName5" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="Program">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="StartTime" />
+            <PropertyRef Name="EndTime" />
+            <PropertyRef Name="FK_Channel" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" MaxLength="30" Unicode="true" FixedLength="true" />
+          <Property Name="Title" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="SubTitle" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Id_MS" Type="String" MaxLength="30" Unicode="true" FixedLength="true" />
+          <Property Name="Id_DD" Type="String" MaxLength="30" Unicode="true" FixedLength="true" />
+          <Property Name="episodeNum" Type="String" MaxLength="30" Unicode="true" FixedLength="true" />
+          <Property Name="rating" Type="String" MaxLength="10" Unicode="true" FixedLength="true" />
+          <Property Name="FK_Channel" Type="String" Nullable="false" MaxLength="30" Unicode="true" FixedLength="true" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="xmlTVDBModelStoreContainer" CdmEntityContainer="xmlTVDBEntities">
+          <EntitySetMapping Name="Channels">
+            <EntityTypeMapping TypeName="xmlTVDBModel.Channel">
+              <MappingFragment StoreEntitySet="Channel">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="displayName1" ColumnName="displayName1" />
+                <ScalarProperty Name="displayName2" ColumnName="displayName2" />
+                <ScalarProperty Name="displayName3" ColumnName="displayName3" />
+                <ScalarProperty Name="displayName4" ColumnName="displayName4" />
+                <ScalarProperty Name="displayName5" ColumnName="displayName5" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Programs">
+            <EntityTypeMapping TypeName="xmlTVDBModel.Program">
+              <MappingFragment StoreEntitySet="Program">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="SubTitle" ColumnName="SubTitle" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="Id_MS" ColumnName="Id_MS" />
+                <ScalarProperty Name="Id_DD" ColumnName="Id_DD" />
+                <ScalarProperty Name="episodeNum" ColumnName="episodeNum" />
+                <ScalarProperty Name="rating" ColumnName="rating" />
+                <ScalarProperty Name="FK_Channel" ColumnName="FK_Channel" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
