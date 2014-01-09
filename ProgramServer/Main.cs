@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Net.Sockets;
 using System.Text;
 using System.Management;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
+using NativeWifi;
 using ProgramServerMessages;
 
 
@@ -19,16 +25,94 @@ namespace ProgramServer
         private static void KeyValueChanged(object sender, EventArrivedEventArgs e)
         {
             Program p = ClientHandler.GetCurrentProgramFromRegistry();
-
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-            string s = ser.Serialize(MessageCreator.CreateMessage(p));
-            Console.Out.WriteLine(s);
+            if (p != null)
+            {
+                JavaScriptSerializer ser = new JavaScriptSerializer();
+                string s = ser.Serialize(MessageCreator.CreateMessage(p));
+                Console.Out.WriteLine(s);
+            }
+            else
+            {
+                Console.Out.WriteLine("ERROR****************: Found unknown program ");
+            }
 
         }
 
+        private static string _ssidStr;
+        private static string GetSSIDName()
+        {
+            var wlan = new WlanClient();
+            Collection<String> connectedSsids = new Collection<string>();
+            Console.Out.WriteLine(LocalIPAddress());
+            foreach (WlanClient.WlanInterface wlanInterface in wlan.Interfaces)
+            {
+                Wlan.Dot11Ssid ssid = wlanInterface.CurrentConnection.wlanAssociationAttributes.dot11Ssid;
+                connectedSsids.Add(new String(Encoding.ASCII.GetChars(ssid.SSID, 0, (int)ssid.SSIDLength)));
+                //wlanInterface.CurrentConnection.wlanAssociationAttributes
+            }
+
+
+            String strHostName = string.Empty;
+            // Getting Ip address of local machine...
+            // First get the host name of local machine.
+            strHostName = Dns.GetHostName();
+            Console.WriteLine("Local Machine's Host Name: " + strHostName);
+            // Then using host name, get the IP address list..
+            IPHostEntry ipEntry = Dns.GetHostEntry(strHostName);
+            IPAddress[] addr = ipEntry.AddressList;
+
+            for (int i = 0; i < addr.Length; i++)
+            {
+                Console.WriteLine("IP Address {0}: {1} ", i, addr[i].ToString());
+            }
+            //Console.ReadLine();
+            if(connectedSsids.Count > 0)
+                return connectedSsids[0];
+            return null;
+        }
+
+
+        public static string LocalIPAddress()
+        {
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 )//|| ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                {
+                    Console.WriteLine(ni.Name);
+                    foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            Console.WriteLine(ip.Address.ToString());
+                        }
+                    }
+                }
+            }
+
+
+            IPAddress ipAddress = Dns.Resolve("localhost").AddressList[0];
+            Console.Out.WriteLine(ipAddress.ToString());
+            IPHostEntry host;
+            string localIP = "";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
+        }
+
+        public static Dictionary<int, ClientHandler> s_clientdictionary = new Dictionary<int, ClientHandler>();
+
         static void Main(string[] args)
         {
+            var ssid = GetSSIDName();
             var serverSocket = new TcpListener(8675);
+            EndPoint ep = serverSocket.LocalEndpoint;
             var clientSocket = default(TcpClient);
             int counter = 0;
             var watcher = new RegistryWatcher(KeyValueChanged);
@@ -45,6 +129,7 @@ namespace ProgramServer
                 Console.WriteLine(" >> " + "Client No:" + Convert.ToString(counter) + " started!");
                 ClientHandler client = new ClientHandler();
                 client.StartClient(clientSocket, Convert.ToString(counter));
+                s_clientdictionary.Add(counter, client);
             }
 
             clientSocket.Close();
@@ -56,94 +141,5 @@ namespace ProgramServer
 
 
 
-    //Class to handle each client request separatly
-    public class ClientHandler
-    {
-        TcpClient _clientSocket;
-        private string clNo;
 
-        public void StartClient(TcpClient inClientSocket, string clineNo)
-        {
-            this._clientSocket = inClientSocket;
-            this.clNo = clineNo;
-            var ctThread = new Thread(Run);
-            ctThread.Start();
-            _registryWatcher = new RegistryWatcher(KeyValueChanged);
-        }
-
-        private void Run()
-        {
-            int requestCount = 0;
-            byte[] bytesFrom = new byte[10025];
-            string dataFromClient = null;
-            Byte[] sendBytes = null;
-            string serverResponse = null;
-            string rCount = null;
-            requestCount = 0;
-            _registryWatcher.InitializeRegistryWatcher();
-            NetworkStream networkStream = _clientSocket.GetStream();
-
-            while ((true))
-            {
-                try
-                {
-                    requestCount = requestCount + 1;
-
-                    //networkStream.Read(bytesFrom, 0, (int)clientSocket.ReceiveBufferSize);
-                    //dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFrom);
-                    //dataFromClient = dataFromClient.Substring(0, dataFromClient.IndexOf("$"));
-                    //Console.WriteLine(" >> " + "From client-" + clNo + dataFromClient);
-
-                    //rCount = Convert.ToString(requestCount);
-                    //serverResponse = "Server to clinet(" + clNo + ") " + rCount;
-                    serverResponse = "sample text\n";
-                    sendBytes = Encoding.ASCII.GetBytes(serverResponse);
-                    networkStream.Write(sendBytes, 0, sendBytes.Length);
-                    networkStream.Flush();
-                    Console.WriteLine(" >> " + serverResponse);
-                    Thread.Sleep(30000);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(" >> " + ex.ToString());
-                }
-            }
-        }
-
-        private void KeyValueChanged(object sender, EventArrivedEventArgs e)
-        {
-            var programName = (string)Registry.GetValue(RegistryWatcher.FullPath,
-                RegistryWatcher.ValueName,
-                RegistryWatcher.InvalidShow);
-            Console.Out.WriteLine("Found program {0}", programName);
-
-        }
-
-        public static Program GetCurrentProgramFromRegistry()
-        {
-            var programName = (string)Registry.GetValue(RegistryWatcher.FullPath,
-                RegistryWatcher.ValueName,
-                RegistryWatcher.InvalidShow);
-
-            Console.Out.WriteLine("Found program {0}", programName);
-            using (var ent = new xmlTVDBEntities())
-            {
-                DateTime now = DateTime.Now;
-                Program prog = null;
-                var query = from p in ent.Programs
-                            where p.Title.Contains(programName) && (p.StartTime <= now && p.EndTime >= now)
-                            select p;
-                foreach (Program pn in query)
-                {
-                    if (prog == null)
-                        prog = pn;
-                    Console.Out.WriteLine("Program {0} - {1} - {2}\n{3} - {4}", pn.Id, pn.Title, pn.SubTitle, pn.StartTime, pn.EndTime);
-                }
-                return prog;
-            }
-            return null;
-        }
-
-        private RegistryWatcher _registryWatcher;
-    }
 }

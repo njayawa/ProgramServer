@@ -76,6 +76,7 @@
     <Compile Include="Channel.cs">
       <DependentUpon>TvData.tt</DependentUpon>
     </Compile>
+    <Compile Include="ClientHandler.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Program.cs">
@@ -98,6 +99,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>TvData.edmx</DependentUpon>
     </Compile>
+    <Compile Include="TvMessageDisplayHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -122,6 +124,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ssid\ManagedWifi.csproj">
+      <Project>{6aa425c9-ea6a-4b01-aaed-5ff122e8b663}</Project>
+      <Name>ManagedWifi</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

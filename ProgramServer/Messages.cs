@@ -11,6 +11,7 @@ namespace ProgramServerMessages
     {
         public string Message { get; set; }
         public TvProgramChange ProgramChangeInfo { get; set; }
+        public TvDisplayMessage DisplayMessage { get; set; }
     }
 
     public class TvProgramChange
@@ -25,13 +26,25 @@ namespace ProgramServerMessages
         public string EndTime { get; set; }
     }
 
+
+    public class TvDisplayMessage
+    {
+        public const String Message = "DISPLAY_MESSAGE";
+        public string Caption;
+        public string Text;
+        public string[] Buttons; //array of buttons to display.  default is OK
+        public string DurationSeconds; //how long to display the message default is 2 seconds
+        public string MessageType;
+        public string Picture;
+    }
+
     public class MessageCreator
     {
         public static TvMessage CreateMessage(Program p)
         {
             var msg = new TvMessage();
             msg.ProgramChangeInfo = new TvProgramChange();
-            msg.ProgramChangeInfo.Id = p.Id;
+            msg.ProgramChangeInfo.Id = p.Id.Trim();
             msg.ProgramChangeInfo.Title = p.Title;
             msg.ProgramChangeInfo.SubTitle = p.SubTitle;
             msg.ProgramChangeInfo.Description = p.Description;
